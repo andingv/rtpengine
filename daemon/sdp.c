@@ -2124,6 +2124,7 @@ static int process_media_attributes(struct sdp_chopper *chop, struct sdp_media *
 		if (MEDIA_ISSET(media, GENERATOR))
 			goto strip;
 
+		// protocol-agnostic attributes
 		switch (attr->attr) {
 			case ATTR_ICE:
 			case ATTR_ICE_UFRAG:
@@ -2152,12 +2153,6 @@ static int process_media_attributes(struct sdp_chopper *chop, struct sdp_media *
 					break;
 				goto strip;
 
-			case ATTR_RTCP:
-			case ATTR_RTCP_MUX:
-				if (flags->ice_option == ICE_FORCE_RELAY)
-					break;
-				goto strip;
-
 			case ATTR_IGNORE:
 			case ATTR_END_OF_CANDIDATES: // we strip it here and re-insert it later
 			case ATTR_MID:
@@ -2170,6 +2165,21 @@ static int process_media_attributes(struct sdp_chopper *chop, struct sdp_media *
 				if (!flags->original_sendrecv)
 					goto strip;
 				break;
+
+			default:
+				break;
+		}
+
+		// leave everything alone if protocol is unsupported
+		if (!media->protocol)
+			continue;
+
+		switch (attr->attr) {
+			case ATTR_RTCP:
+			case ATTR_RTCP_MUX:
+				if (flags->ice_force_relay)
+					break;
+				goto strip;
 
 			case ATTR_RTPMAP:
 			case ATTR_FMTP:
@@ -2603,12 +2613,13 @@ static struct packet_stream *print_sdp_media_section(GString *s, struct call_med
 
 		ps_rtcp = print_rtcp(s, media, rtp_ps_link, flags);
 
-		insert_crypto(s, media, flags);
-		insert_dtls(s, media);
+		if (proto_is_rtp(call_media->protocol)) {
+			insert_crypto(s, media, flags);
+			insert_dtls(s, media);
 
-		if (proto_is_rtp(media->protocol) && media->ptime)
-			g_string_append_printf(s, "a=ptime:%i\r\n", media->ptime);
-
+			if (proto_is_rtp(media->protocol) && media->ptime)
+				g_string_append_printf(s, "a=ptime:%i\r\n", media->ptime);
+		}
 		if (MEDIA_ISSET(media, ICE) && media->ice_agent) {
 			g_string_append(s, "a=ice-ufrag:");
 			g_string_append_printf(s, STR_FORMAT, STR_FMT(&media->ice_agent->ufrag[1]));
