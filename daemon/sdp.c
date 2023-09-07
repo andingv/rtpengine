@@ -2177,7 +2177,7 @@ static int process_media_attributes(struct sdp_chopper *chop, struct sdp_media *
 		switch (attr->attr) {
 			case ATTR_RTCP:
 			case ATTR_RTCP_MUX:
-				if (flags->ice_force_relay)
+				if (flags->ice_option == ICE_FORCE_RELAY)
 					break;
 				goto strip;
 
