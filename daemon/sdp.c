@@ -2613,7 +2613,7 @@ static struct packet_stream *print_sdp_media_section(GString *s, struct call_med
 
 		ps_rtcp = print_rtcp(s, media, rtp_ps_link, flags);
 
-		if (proto_is_rtp(media->protocol) { 
+		if (proto_is_rtp(media->protocol)) { 
 			insert_crypto(s, media, flags);
 			insert_dtls(s, media);
 
