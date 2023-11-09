@@ -8,6 +8,6 @@
 #include <spandsp/dtmf.h>
 #include "compat.h"
 
-INLINE void dtmf_rx_fillin(dtmf_rx_state_t *dsp, int n) {
+INLINE int dtmf_rx_fillin(dtmf_rx_state_t *dsp, int n) {
 	// stub
 }
