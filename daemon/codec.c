@@ -939,7 +939,6 @@ static void __rtcp_timer_run(struct codec_timer *ct) {
 		rwlock_unlock_w(&rt->call->master_lock);
 		goto out;
 	}
-	timeval_add_usec(&ct->next, 2500000 + (ssl_random() % 1000000));
 	__codec_rtcp_timer_schedule(media);
 
 	// switch locks to be more graceful
